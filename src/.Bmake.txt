@@ -1,0 +1,6 @@
+[FILENAME]
+main.c
+[ARGUMENTS]
+[ENDOFARGUMENTS]
+[OUTPUT]
+main
