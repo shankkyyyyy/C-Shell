@@ -4,37 +4,32 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <string.h>
+#include "../include/cget.h"
 
 
 // main function
 int main()
 {
+    
     // loop for shell [cannot end]
     while (1) {
 	
         printf("Shell?> ");
         // input variable declaration
-        char input[150];
+        char *buffer = malloc(1024);
         // taking input
-        if (fgets(input, 150, stdin)==NULL)
-		{
-			printf("Error in taking input.\n");
-			continue;
-		}
+        cgets(buffer, 1024);
         // taking the length of the input
-        size_t len = strlen(input);
-		
+        size_t len = strlen(buffer);
+       
         // making the last byte 0
-		if (len==1)
+		if (len==0)
 		{
 			continue;
 		}
-		else 
-		{
-			input[len - 1] = 0;
-		}
+		
         // tokenizing the input string; delim is " "
-        char *output = strtok(input, " ");
+        char *output = strtok(buffer, " ");
         // count for args
         int i = 0;
         // dynamically allocating memory for string array/double pointer
@@ -47,7 +42,10 @@ int main()
             // gets the directory name
             output = strtok(NULL, " ");
             // changes to that directory
-            chdir(output);
+            if (chdir(output)== -1)
+            {
+                perror("Cannot Change Directory.\n");
+            }
             // free's the dynamically allocated array
             free(args);
             // continues the loop;
