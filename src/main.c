@@ -5,7 +5,9 @@
 #include <sys/wait.h>
 #include <string.h>
 #include "../include/cget.h"
+#include "../include/history.h"
 
+int GB_log = 0;
 
 // main function
 int main()
@@ -13,22 +15,37 @@ int main()
     
     // loop for shell [cannot end]
     while (1) {
-	
+	if (GB_log > 0)
+	{
+		GB_log = 0;
+	}
         printf("Shell?> ");
         // input variable declaration
         char *buffer = malloc(1024);
         // taking input
-        cgets(buffer, 1024);
+        int result = cgets(buffer, 1024);
         // taking the length of the input
-        size_t len = strlen(buffer);
+        if (result==10)
+	{
+	   GB_log++;
+	   char *buffer = GetHistory(GB_log);
+	   printf("%s",buffer);
+	   continue;
+	}
+	size_t len = strlen(buffer);
        
         // making the last byte 0
-		if (len==0)
-		{
-			continue;
-		}
-		
+	if (len==0)
+	{
+	    continue;
+	}
+	int history = add_history(buffer);
+	if (history == 1)
+	{
+		printf("This command Cant Be added to history.txtfile");
+	}	
         // tokenizing the input string; delim is " "
+	
         char *output = strtok(buffer, " ");
         // count for args
         int i = 0;

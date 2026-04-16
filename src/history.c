@@ -1,7 +1,81 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include "../include/history.h"
 
-int add_history(const char* command)
+// define's
+#define BufferSize 1024
+
+// functions 
+char *History(FILE *fp,FILE *fp2,int times)
+{
+
+	char TemBuffer[BufferSize];
+	int CountOfLines = 0;
+	
+	while(fgets(TemBuffer,BufferSize,fp2)!=NULL)
+	{
+		CountOfLines++;
+		continue;
+	}
+	fclose(fp2);
+
+	int NumberOfLines = CountOfLines - times;
+	
+	// count
+	int i = 0;
+	
+	memset(TemBuffer,0,BufferSize);
+	
+	while(i!=NumberOfLines)
+	{
+		fgets(TemBuffer,BufferSize,fp);
+		//count
+		i++;
+	}
+	// last read.
+	
+	char *buffer = malloc(BufferSize);
+	fgets(buffer,BufferSize,fp);
+	//closing the file pointer;
+	fclose(fp);
+	return buffer;
+}
+
+int AddHistory(char *command,char *filepath)
+{
+	FILE *fp = fopen(".temp.txt","w+");
+	if (fp == NULL)
+	{
+		perror("error opening the temp file. \n");
+		return -1;
+	}
+	fprintf(fp,"%s\n",command);
+	
+	FILE *fp_history = fopen(filepath,"a+");
+	if (fp_history == NULL)
+	{
+		fclose(fp);
+		perror("error opening the history file.\n");
+		return -1;
+	}
+	
+	char buffer[BufferSize];
+	
+	while(fgets(buffer,BufferSize,fp_history)!=NULL)
+	{
+	    if(fprintf(fp,"%s",buffer) < 0) return -1;
+	}
+	
+	fclose(fp);
+	fclose(fp_history);
+	
+	remove(filepath);
+	if(rename(".temp.txt",filepath) != 0) return -1;
+	return 0;
+}
+
+int add_history(char* command)
 {
 
 	char buffer[1024];
@@ -16,7 +90,7 @@ int add_history(const char* command)
 	{
 		return 1;
 	}
-	
+		
 	FILE *fp = fopen(buffer,"a+");
 	
 	if (fp == NULL)
@@ -25,68 +99,27 @@ int add_history(const char* command)
 		return 1;
 	}
 	
-	int result = fprintf(fp,command);
-	if (result < 0)
+	if (fprintf(fp,"%s\n",command)< 0)
 	{
-		fclose(fp);
-		perror("Cannot Write To History File.");
+		perror("Error Writing To File.\n");
 		return 1;
 	}
+	
 	fclose(fp);
 	return 0;
 }
 
-char *get_history(int times)
+char *GetHistory(int log)
 {
-	char buffer[1024];
-	char *home = getenv("HOME");
-
-	if (home == NULL)
-	{
-		perror("Cannot Find the Home Directory");
-		return 1;
-	}
-	if (snprintf(buffer,1024,"%s/.history_C-Shell.txt",home) < 0)
-	{
-		return 1;
-	}
-	
-	FILE *fp = fopen(buffer,"r");
-	if (fp==NULL)
-	{
-		perror("Error.");
-		return NULL;
-	}
-	char temp[2000];
-	char *buffer_2 = malloc(2034);
-	int i = 1;
-	while(fgets(temp,2000,fp)!=NULL)
-	{
-		i++;
-		continue;
-	}
-	// 6 lines 2 6-2 = 3 + 1
-	// 6 lines 2 6 - 2 = 4 + 1
-	// i = 6
-	int desired = i - times; 
-	// 6 - 2 = 4
-	printf("%d\n",i);
-	for (int j = 0;j >= desired;j++)
-	{
-		fgets(temp,2000,fp);
-		printf("%d: %s :desire: %d",j,temp,desired);
-	}
-
-	fgets(buffer_2,2034,fp);
-	fclose(fp);
-	return buffer_2;
+	FILE *fp = fopen("/home/gigu/.history_C-Shell.txt","a+");
+	FILE *fp2 = fopen("/home/gigu/.history_C-Shell.txt","a+");
+	char *OutputBuffer = History(fp,fp2,4);
+	return OutputBuffer; // must free the buffer;
 }
 
 int main()
 {
-	add_history("first\n");
-	add_history("second\n");
-	char *buffer = get_history(2);
-	printf("%s",buffer);
-	return 0;
+	AddHistory("ls","h.txt");
+	AddHistory("cd","h.txt");
+	AddHistory("clear","h.txt");
 }
