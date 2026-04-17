@@ -1,44 +1,75 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include "../include/history.h"
 
-int add_history(const char* command)
+// define's
+#define BufferSize 1024
+
+// functions 
+char *History(FILE *fp,int times)
 {
-
-	char buffer[1024];
-	char *home = getenv("HOME");
-
-	if (home == NULL)
+	int i = 1;
+	char tempbuffer[1024];
+	while (times > i && fgets(tempbuffer,BufferSize,fp)!=NULL)
 	{
-		perror("Cannot Find the Home Directory");
-		return 1;
+		i++;
+		continue;
 	}
-	if (snprintf(buffer,1024,"%s/.history_C-Shell.txt",home) < 0)
-	{
-		return 1;
-	}
-	
-	FILE *fp = fopen(buffer,"a+");
-	
+	char *buffer = malloc(BufferSize);
+	if(fgets(buffer,BufferSize,fp)== NULL) return NULL;
+	return buffer;
+}
+
+int AddHistory(char *command,char *filepath)
+{	
+	FILE *fp = fopen(".temp.txt","w+");
 	if (fp == NULL)
 	{
-		perror("Cannot Open The File For History.");
-		return 1;
+		perror("error opening the temp file. \n");
+		return -1;
 	}
 	
-	int result = fprintf(fp,command);
-	if (result < 0)
+	fprintf(fp,"%s\n",command);
+	
+	FILE *fp_history = fopen(filepath,"a+");
+	if (fp_history == NULL)
 	{
 		fclose(fp);
-		perror("Cannot Write To History File.");
-		return 1;
+		perror("error opening the history file.\n");
+		return -1;
 	}
+	
+	char buffer[BufferSize];
+	
+	while(fgets(buffer,BufferSize,fp_history)!=NULL)
+	{
+	    if(fprintf(fp,"%s",buffer) < 0) {
+		    fclose(fp);
+		    fclose(fp_history);
+		    return -1;
+	    }
+	}
+	
 	fclose(fp);
+	fclose(fp_history);
+	
+	remove(filepath);
+	if(rename(".temp.txt",filepath) != 0) return -1;
 	return 0;
 }
 
-int main()
+char *GetHistory(int log)
 {
-	add_history("first\n");
-	add_history("second\n");
-	return 0;
+	FILE *fp = fopen("h.txt","a+");
+	if (fp == NULL)
+	{
+		perror(" ");
+		return NULL;
+	}
+	
+	char *OutputBuffer = History(fp,4);
+	fclose(fp);
+	return OutputBuffer; // must free the buffer;
 }
+

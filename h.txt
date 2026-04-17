@@ -1,0 +1,8 @@
+cd ..
+cls
+clear
+clear --help
+clear
+clear 
+ls -la
+ls -la
