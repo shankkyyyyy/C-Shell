@@ -5,9 +5,18 @@
 #include <sys/wait.h>
 #include <string.h>
 #include "../include/cget.h"
-#include "../include/history.h"
 
-int GB_log = 0;
+//char* null_terminate(char *string)
+//{
+  //  size_t len = strlen(string);
+    //if (string[len - 1] == '\n')
+    //{
+      //  printf("got newline.\n");
+       // string[len - 1] = '\0';
+   // }
+  //  return string; 
+//}
+
 
 // main function
 int main()
@@ -15,38 +24,37 @@ int main()
     
     // loop for shell [cannot end]
     while (1) {
-	if (GB_log > 0)
-	{
-		GB_log = 0;
-	}
+	
         printf("Shell?> ");
         // input variable declaration
         char *buffer = malloc(1024);
+
+        memset(buffer,0,1024);
         // taking input
-        int result = cgets(buffer, 1024);
+        int identifier = cgets(buffer,1024);
+        size_t sizeofbuffer = strlen(buffer);
+        
+        if (identifier == 10)
+        {
+            printf("nothing");
+        }
         // taking the length of the input
-        if (result==10)
-	{
-	   GB_log++;
-	   char *buffer = GetHistory(GB_log);
-	   printf("%s",buffer);
-	   continue;
-	}
-	size_t len = strlen(buffer);
+        size_t len = strlen(buffer);
        
         // making the last byte 0
-	if (len==0)
-	{
-	    continue;
-	}
-	int history = add_history(buffer);
-	if (history == 1)
-	{
-		printf("This command Cant Be added to history.txtfile");
-	}	
+		if (len==0)
+		{
+			continue;
+		}
+		
         // tokenizing the input string; delim is " "
-	
         char *output = strtok(buffer, " ");
+        if (output == NULL)
+        {
+            printf("NULL FOUND......"); 
+            return -1;
+        }
+
         // count for args
         int i = 0;
         // dynamically allocating memory for string array/double pointer
@@ -91,7 +99,6 @@ int main()
         }
         // make sure the last dynamic array should NULL
         args[i] = NULL;
-    
 
     
     // declaring a pid_t variable

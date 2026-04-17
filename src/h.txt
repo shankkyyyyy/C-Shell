@@ -1,3 +1,16 @@
+cd ..
+ls
+ls
+ls
+cd
+ls
+cd ..
+clear
+ls
+ls -la
+ls
+ls 
+ls
 clear
 cd
 ls

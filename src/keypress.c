@@ -30,26 +30,12 @@ int cgets(char *buffer, int size)
 	
 		if (character == '\n' || character == '\r')
 		{
-			// checks for the size of the buffer to prevent overflow
-			if  (j > size)
-			{
-				return -1;
-			}
 			
-			if (j == 0)
-			{
-				strcpy(buffer,"\0");
-			}
-			else 
-			{
-				strcat (buffer, "\0");
-			}
-			// prints newline 
+			buffer[j] = '\0'; // Finalize the string
 			printf("\n");
-			// restores the old terminal 
-			tcsetattr(STDIN_FILENO,TCSANOW,&oldt);
-			// returns the buffer
+			tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 			return 0;
+			
 		}
 
 		// if the character is backspace or delete 
@@ -64,6 +50,7 @@ int cgets(char *buffer, int size)
 				fflush (stdout);
 				// decrements the index
 				j--;
+				buffer[j] = '\0';
 			}
 			// if there is no characters in the buffer
 			else 
@@ -81,12 +68,14 @@ int cgets(char *buffer, int size)
 			// if it is an up arrow, it returns 10
 			if (d == 'A') 
 			{
+				buffer[j] = '\0';
 				tcsetattr(STDIN_FILENO,TCSANOW,&oldt); // restore the old terminal settings before returning
 				return 10; // up arrow, it returns 10 for up arrow
 			}
 			// if it is a down arrow, it returns 11
 			if (d == 'B') 
 			{
+				buffer[j] = '\0';
 				tcsetattr(STDIN_FILENO,TCSANOW,&oldt); // restore the old terminal settings before returning
 				return 11; // down arrow, it returns 11 for down arrow
 			}

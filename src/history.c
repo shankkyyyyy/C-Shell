@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include "../include/history.h"
+#include "../include/history.h"
 
 // define's
 #define BufferSize 1024
@@ -22,7 +22,7 @@ char *History(FILE *fp,int times)
 }
 
 int AddHistory(char *command,char *filepath)
-{
+{	
 	FILE *fp = fopen(".temp.txt","w+");
 	if (fp == NULL)
 	{
@@ -65,10 +65,7 @@ char *GetHistory(int log)
 	}
 	
 	char *OutputBuffer = History(fp,4);
-	printf("%s\n",OutputBuffer); // must free the buffer;
+	close(fp);
+	return OutputBuffer; // must free the buffer;
 }
 
-int main()
-{
-	GetHistory(1);
-}
