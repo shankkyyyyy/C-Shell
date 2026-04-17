@@ -5,18 +5,9 @@
 #include <sys/wait.h>
 #include <string.h>
 #include "../include/cget.h"
+#include "../include/history.h"
 
-//char* null_terminate(char *string)
-//{
-  //  size_t len = strlen(string);
-    //if (string[len - 1] == '\n')
-    //{
-      //  printf("got newline.\n");
-       // string[len - 1] = '\0';
-   // }
-  //  return string; 
-//}
-
+extern int GB_log = 0;
 
 // main function
 int main()
@@ -31,19 +22,22 @@ int main()
 
         memset(buffer,0,1024);
         // taking input
-        int identifier = cgets(buffer,1024);
-        size_t sizeofbuffer = strlen(buffer);
-        
-        if (identifier == 10)
+        int identifier = cgets(buffer,1024,GB_log);
+
+
+        // making the GB_log zero for getting the history once more; 
+        if (GB_log > 0)
         {
-            printf("nothing");
+            GB_log = 0;
         }
+
         // taking the length of the input
         size_t len = strlen(buffer);
        
         // making the last byte 0
 		if (len==0)
 		{
+			free(buffer);
 			continue;
 		}
 		
@@ -58,7 +52,12 @@ int main()
         // count for args
         int i = 0;
         // dynamically allocating memory for string array/double pointer
-        char **args = malloc(1500);
+        char **args = malloc(64 * sizeof(char *));
+        if (args == NULL)
+        {
+            perror("Cannot allocate memory to args");
+            return 1;
+        }
         // making the first output into args[0]
         args[i] = output;
         
@@ -71,35 +70,15 @@ int main()
             {
                 perror("Cannot Change Directory.\n");
             }
-            // free's the dynamically allocated array
-            free(args);
+            
             // continues the loop;
             continue;
         }
         
-        // increments the count.
-        i++;
-        // while loop for making sure output doesnt end up NULL
         while (output != NULL) {
-            // tokenizing string
             output = strtok(NULL, " ");
-            // statement for if output == NULL
-            if (output == NULL) {
-                // increments the count; cause need to add NULL atlast for the dynamic array;
-                i++;
-                // breaking from the while loop;
-                break;
-            }
-            // writing to the dynamic array
-            args[i] = output;
-            // printing it to the screen
-            
-            // increments
             i++;
-        }
-        // make sure the last dynamic array should NULL
-        args[i] = NULL;
-
+            args[i] = output;
     
     // declaring a pid_t variable
     pid_t pid = fork();
@@ -108,6 +87,7 @@ int main()
     if (pid == -1) {
         // prinint error
         perror("Fork Cannot Be done.\n");
+        free(args);
         return 1;
     }
     // statement for child process
@@ -130,7 +110,10 @@ int main()
         int status;
         // waiting for the child to finish .
         waitpid(pid, &status, 0);
+        // free the dynamically allocated args
+        free(args);
     }
 }
 
+}
 }

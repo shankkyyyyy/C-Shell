@@ -4,8 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../include/cget.h"
+#include "../include/history.h"
 
-int cgets(char *buffer, int size)
+int cgets(char *buffer, int size,int GB_log)
 {
 	memset(buffer, 0, size); // Initialize buffer to zero
 	
@@ -69,8 +70,37 @@ int cgets(char *buffer, int size)
 			if (d == 'A') 
 			{
 				buffer[j] = '\0';
-				tcsetattr(STDIN_FILENO,TCSANOW,&oldt); // restore the old terminal settings before returning
-				return 10; // up arrow, it returns 10 for up arrow
+				GB_log++; 
+				if (GB_log == 1)
+				{
+				
+				char *buffer = GetHistory(GB_log);
+				size_t len = strlen(buffer);
+				if (buffer[len - 1] == '\n')
+				{
+					buffer[len - 1] = '\0';
+				}
+				j = len; 
+				printf("%s",buffer);
+				fflush(stdout);
+
+				}
+				else 
+				{
+					printf("\r\33[2K");
+					fflush(stdout);
+					printf("Shell?> ");
+					char *buffer = GetHistory(GB_log);
+					size_t len = strlen(buffer);
+					if (buffer[len - 1] == '\n')
+					{
+						buffer[len - 1] = '\0';
+					}
+					j = len;
+					printf("%s",buffer);
+					fflush(stdout);
+				}
+				continue;
 			}
 			// if it is a down arrow, it returns 11
 			if (d == 'B') 
@@ -96,5 +126,15 @@ int cgets(char *buffer, int size)
 		}
 	}
 
+}
+
+int backspace()
+{
+	struct termios new,old; 
+	tcgetattr(STDIN_FILENO,&old);
+
+	new = old; 
+	new.c_lflag &= ~(ICANON | ECHO);
+	
 }
 

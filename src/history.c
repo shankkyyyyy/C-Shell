@@ -44,7 +44,11 @@ int AddHistory(char *command,char *filepath)
 	
 	while(fgets(buffer,BufferSize,fp_history)!=NULL)
 	{
-	    if(fprintf(fp,"%s",buffer) < 0) return -1;
+	    if(fprintf(fp,"%s",buffer) < 0) {
+		    fclose(fp);
+		    fclose(fp_history);
+		    return -1;
+	    }
 	}
 	
 	fclose(fp);
@@ -65,7 +69,7 @@ char *GetHistory(int log)
 	}
 	
 	char *OutputBuffer = History(fp,4);
-	close(fp);
+	fclose(fp);
 	return OutputBuffer; // must free the buffer;
 }
 
